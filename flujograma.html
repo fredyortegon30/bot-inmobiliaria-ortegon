@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flujograma — Bot Inmobiliaria Ortegón</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #f0f4f8;
+    padding: 30px 20px 60px;
+    color: #1a202c;
+  }
+  h1 {
+    text-align: center;
+    font-size: 26px;
+    font-weight: 800;
+    color: #1a365d;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    text-align: center;
+    color: #718096;
+    font-size: 14px;
+    margin-bottom: 36px;
+  }
+
+  /* ACTORES */
+  .actors {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 36px;
+  }
+  .actor {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #4a5568;
+  }
+  .actor .icon {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+  }
+  .actor.cliente .icon  { background: #c6f6d5; }
+  .actor.bot .icon      { background: #bee3f8; }
+  .actor.script .icon   { background: #fefcbf; }
+  .actor.sheets .icon   { background: #e9d8fd; }
+  .actor.drive .icon    { background: #fed7d7; }
+  .actor.admin .icon    { background: #fbd38d; }
+
+  /* LEYENDA */
+  .legend {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+    font-size: 12px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-dot {
+    width: 12px; height: 12px; border-radius: 50%;
+  }
+
+  /* PASOS */
+  .flow {
+    max-width: 820px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .step {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    position: relative;
+  }
+  .step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 27px;
+    top: 58px;
+    bottom: -12px;
+    width: 2px;
+    background: #cbd5e0;
+    z-index: 0;
+  }
+  .step-num {
+    min-width: 56px; height: 56px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    font-weight: 800;
+    flex-shrink: 0;
+    z-index: 1;
+    box-shadow: 0 2px 6px rgba(0,0,0,.15);
+  }
+  .step-body {
+    flex: 1;
+    background: white;
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.07);
+    border-left: 4px solid transparent;
+  }
+  .step-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .step-desc {
+    font-size: 13px;
+    color: #4a5568;
+    line-height: 1.6;
+  }
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .tag {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+
+  /* COLORES POR ACTOR */
+  .c-cliente  { background: #c6f6d5; color: #276749; border-left-color: #38a169; }
+  .c-bot      { background: #bee3f8; color: #1a365d; border-left-color: #3182ce; }
+  .c-script   { background: #fefcbf; color: #744210; border-left-color: #d69e2e; }
+  .c-sheets   { background: #e9d8fd; color: #44337a; border-left-color: #805ad5; }
+  .c-drive    { background: #fed7d7; color: #742a2a; border-left-color: #e53e3e; }
+  .c-admin    { background: #feebc8; color: #7b341e; border-left-color: #dd6b20; }
+  .c-multi    { background: #e2e8f0; color: #2d3748; border-left-color: #718096; }
+
+  .num-cliente { background: #38a169; color: white; }
+  .num-bot     { background: #3182ce; color: white; }
+  .num-script  { background: #d69e2e; color: white; }
+  .num-sheets  { background: #805ad5; color: white; }
+  .num-drive   { background: #e53e3e; color: white; }
+  .num-admin   { background: #dd6b20; color: white; }
+  .num-multi   { background: #718096; color: white; }
+
+  /* FLECHAS DE CONEXIÓN */
+  .connector {
+    text-align: center;
+    font-size: 20px;
+    color: #a0aec0;
+    margin: -6px 0 2px 28px;
+  }
+
+  /* URLS */
+  .url-box {
+    max-width: 820px;
+    margin: 30px auto 0;
+    background: white;
+    border-radius: 14px;
+    padding: 20px 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  }
+  .url-box h2 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    color: #1a365d;
+  }
+  .url-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 14px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    background: #f7fafc;
+    border-left: 4px solid #3182ce;
+  }
+  .url-label { font-size: 12px; font-weight: 700; color: #718096; text-transform: uppercase; }
+  .url-name  { font-size: 14px; font-weight: 700; color: #1a365d; }
+  .url-link  { font-size: 11px; color: #3182ce; word-break: break-all; cursor: pointer; text-decoration: underline; }
+  .url-link:hover { color: #2b6cb0; }
+
+  /* TAG colors */
+  .tag-wpp    { background: #c6f6d5; color: #276749; }
+  .tag-bot    { background: #bee3f8; color: #1a365d; }
+  .tag-script { background: #fefcbf; color: #744210; }
+  .tag-sheets { background: #e9d8fd; color: #44337a; }
+  .tag-drive  { background: #fed7d7; color: #742a2a; }
+  .tag-email  { background: #fbd38d; color: #7b341e; }
+
+  .bifurcation {
+    max-width: 820px;
+    margin: 0 auto 16px;
+    display: flex;
+    gap: 14px;
+    padding-left: 72px;
+  }
+  .branch {
+    flex: 1;
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 13px;
+    box-shadow: 0 2px 6px rgba(0,0,0,.07);
+  }
+  .branch-title { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
+  .branch-ok   { background: #f0fff4; border: 2px solid #38a169; color: #276749; }
+  .branch-no   { background: #fff5f5; border: 2px solid #e53e3e; color: #742a2a; }
+
+  @media (max-width: 600px) {
+    .bifurcation { flex-direction: column; padding-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<h1>🏠 Bot Inmobiliaria Ortegón</h1>
+<p class="subtitle">¿Cómo funciona el sistema completo? — Guía visual paso a paso</p>
+
+<!-- ACTORES -->
+<div class="actors">
+  <div class="actor cliente"><div class="icon">👤</div>Cliente</div>
+  <div class="actor bot"><div class="icon">🤖</div>Bot Orty</div>
+  <div class="actor script"><div class="icon">⚙️</div>Servidor<br>(Apps Script)</div>
+  <div class="actor sheets"><div class="icon">📊</div>Base de datos<br>(Sheets)</div>
+  <div class="actor drive"><div class="icon">📁</div>Google Drive<br>(PDFs)</div>
+  <div class="actor admin"><div class="icon">👨‍💼</div>Administrador</div>
+</div>
+
+<!-- LEYENDA -->
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#38a169"></div> Acciones del cliente</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#3182ce"></div> Bot en WhatsApp</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#d69e2e"></div> Servidor automático</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#dd6b20"></div> Acciones del admin</div>
+</div>
+
+<!-- FLUJO -->
+<div class="flow">
+
+  <!-- 1 -->
+  <div class="step">
+    <div class="step-num num-cliente">1</div>
+    <div class="step-body c-cliente">
+      <div class="step-title">👤 El cliente escribe al WhatsApp de la inmobiliaria</div>
+      <div class="step-desc">El cliente inicia la conversación con un saludo o preguntando por propiedades. El bot <strong>Orty</strong> responde automáticamente las 24 horas.</div>
+      <div class="tags">
+        <span class="tag tag-wpp">📱 WhatsApp</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="step">
+    <div class="step-num num-bot">2</div>
+    <div class="step-body c-bot">
+      <div class="step-title">🤖 El Bot Orty muestra las propiedades disponibles</div>
+      <div class="step-desc">El bot presenta el catálogo de casas y apartamentos con fotos, precios, ubicación y características. El cliente puede preguntar libremente.</div>
+      <div class="tags">
+        <span class="tag tag-bot">🤖 IA BuilderBot</span>
+        <span class="tag tag-wpp">📱 WhatsApp</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="step">
+    <div class="step-num num-cliente">3</div>
+    <div class="step-body c-cliente">
+      <div class="step-title">👤 El cliente elige una propiedad y da sus datos</div>
+      <div class="step-desc">Cuando le interesa una propiedad, el bot le pide: <strong>nombre completo, número de cédula y correo electrónico</strong> para iniciar el estudio crediticio. El cliente puede enviarlos todos juntos o uno a uno.</div>
+      <div class="tags">
+        <span class="tag tag-wpp">📱 WhatsApp</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 -->
+  <div class="step">
+    <div class="step-num num-bot">4</div>
+    <div class="step-body c-bot">
+      <div class="step-title">🤖 El bot muestra el resumen y pide confirmación</div>
+      <div class="step-desc">El bot muestra un resumen con todos los datos (nombre, cédula, correo, propiedad, precio, dirección) y pregunta: <em>"¿Los datos son correctos? Escribe <strong>confirmar</strong> para continuar."</em></div>
+      <div class="tags">
+        <span class="tag tag-bot">🤖 IA BuilderBot</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5 -->
+  <div class="step">
+    <div class="step-num num-script">5</div>
+    <div class="step-body c-script">
+      <div class="step-title">⚙️ El servidor crea el contrato automáticamente</div>
+      <div class="step-desc">Cuando el cliente escribe "confirmar", el bot envía todos los datos al servidor. El servidor <strong>crea el contrato</strong>, lo guarda en la base de datos y genera un <strong>enlace único</strong> para que el cliente lo firme.</div>
+      <div class="tags">
+        <span class="tag tag-script">⚙️ Apps Script</span>
+        <span class="tag tag-sheets">📊 Google Sheets</span>
+        <span class="tag tag-email">📧 Email al admin</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6 -->
+  <div class="step">
+    <div class="step-num num-bot">6</div>
+    <div class="step-body c-bot">
+      <div class="step-title">🤖 El bot envía el enlace del contrato al cliente</div>
+      <div class="step-desc">El cliente recibe por WhatsApp un enlace personalizado. Al abrirlo ve su contrato con todos los datos ya diligenciados.</div>
+      <div class="tags">
+        <span class="tag tag-wpp">📱 WhatsApp</span>
+        <span class="tag tag-bot">🔗 Link único</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7 -->
+  <div class="step">
+    <div class="step-num num-cliente">7</div>
+    <div class="step-body c-cliente">
+      <div class="step-title">👤 El cliente firma el contrato digitalmente</div>
+      <div class="step-desc">El cliente entra al enlace y completa 4 pasos:
+        <br>① Lee el contrato completo
+        <br>② Dibuja su firma con el dedo o el mouse
+        <br>③ Sube fotos de su cédula (ambas caras)
+        <br>④ Envía el contrato firmado
+      </div>
+      <div class="tags">
+        <span class="tag tag-bot">🌐 Página web</span>
+        <span class="tag tag-wpp">✍️ Firma digital</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8 -->
+  <div class="step">
+    <div class="step-num num-script">8</div>
+    <div class="step-body c-script">
+      <div class="step-title">⚙️ El servidor guarda el PDF firmado y notifica a todos</div>
+      <div class="step-desc">El servidor recibe la firma, genera el PDF del contrato con la firma incluida y automáticamente:
+        <br>📁 Guarda el PDF en Google Drive
+        <br>📧 Envía el PDF por correo al cliente y al administrador
+        <br>📱 Envía mensaje de confirmación por WhatsApp al cliente
+        <br>📊 Actualiza el estado en la base de datos
+      </div>
+      <div class="tags">
+        <span class="tag tag-script">⚙️ Apps Script</span>
+        <span class="tag tag-drive">📁 Google Drive</span>
+        <span class="tag tag-email">📧 Gmail</span>
+        <span class="tag tag-wpp">📱 WhatsApp</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9 -->
+  <div class="step">
+    <div class="step-num num-admin">9</div>
+    <div class="step-body c-admin">
+      <div class="step-title">👨‍💼 El administrador revisa el contrato en el panel</div>
+      <div class="step-desc">El administrador entra al panel de control, ve todos los contratos organizados, filtra por estado (pendiente, firmado, aprobado), abre el PDF firmado desde Google Drive y toma una decisión.</div>
+      <div class="tags">
+        <span class="tag tag-email">🔐 Panel Admin</span>
+        <span class="tag tag-drive">📁 Ver PDF firmado</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- BIFURCACIÓN -->
+<div class="bifurcation">
+  <div class="branch branch-ok">
+    <div class="branch-title">✅ Si APRUEBA el contrato</div>
+    El cliente recibe un WhatsApp automático:<br>
+    <em>"¡Tu contrato ha sido aprobado! Bienvenido a Inmobiliaria Ortegón."</em>
+  </div>
+  <div class="branch branch-no">
+    <div class="branch-title">❌ Si RECHAZA el contrato</div>
+    El cliente recibe un WhatsApp automático con el motivo del rechazo:<br>
+    <em>"Tu solicitud no fue aprobada. Motivo: [razón]."</em>
+  </div>
+</div>
+
+<!-- URLS -->
+<div class="url-box">
+  <h2>🔗 URLs y accesos del sistema</h2>
+
+  <!-- QR WHATSAPP -->
+  <div class="url-item" style="border-left-color:#25d366; flex-direction:row; align-items:center; gap:20px; flex-wrap:wrap;">
+    <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:200px">
+      <div class="url-label">📱 Probar el Bot en WhatsApp</div>
+      <div class="url-name">Bot Orty — Inmobiliaria Ortegón</div>
+      <div class="url-link" onclick="window.open('https://wa.me/573127605644','_blank')">
+        https://wa.me/573127605644
+      </div>
+      <div style="font-size:12px;color:#718096;margin-top:4px">📷 Escanea el QR con la cámara de tu celular o haz clic en el link para abrir WhatsApp directamente</div>
+    </div>
+    <div style="text-align:center;flex-shrink:0">
+      <img
+        src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https://wa.me/573127605644&bgcolor=ffffff&color=128C7E&margin=6"
+        alt="QR WhatsApp Bot Orty"
+        style="border-radius:10px;border:3px solid #25d366;display:block;"
+        width="140" height="140"
+      />
+      <div style="font-size:11px;color:#38a169;font-weight:700;margin-top:6px">📱 Escanear para chatear</div>
+    </div>
+  </div>
+
+  <!-- PROMPT -->
+  <div class="url-item" style="border-left-color:#3182ce">
+    <div class="url-label">🤖 Prompt del Bot (instrucciones de la IA)</div>
+    <div class="url-name">Documento con el prompt del asistente Orty</div>
+    <div class="url-link" onclick="window.open('https://docs.google.com/document/d/178lTjsueVM3AqmvKDLDjRt5BeF75oYJxe6HgBMgvb-k/edit?usp=sharing','_blank')">
+      https://docs.google.com/document/d/178lTjsueVM3AqmvKDLDjRt5BeF75oYJxe6HgBMgvb-k/edit
+    </div>
+  </div>
+
+  <!-- SHEETS -->
+  <div class="url-item" style="border-left-color:#805ad5">
+    <div class="url-label">📊 Base de datos (Google Sheets)</div>
+    <div class="url-name">Hoja de contratos — Todos los registros en tiempo real</div>
+    <div class="url-link" onclick="window.open('https://docs.google.com/spreadsheets/d/1OZXqBNRPmpuFExV_kD6EFECdcGxqIQkCPs6EKa3kaSY/edit?usp=sharing','_blank')">
+      https://docs.google.com/spreadsheets/d/1OZXqBNRPmpuFExV_kD6EFECdcGxqIQkCPs6EKa3kaSY/edit
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div class="url-item" style="border-left-color:#dd6b20">
+    <div class="url-label">👨‍💼 Panel de administración</div>
+    <div class="url-name">Panel Admin — Ver, aprobar y rechazar contratos</div>
+    <div class="url-link" onclick="window.open('https://script.google.com/macros/s/AKfycbxDke4iQPJNiN-4ZgOsUI-NCVKTB3WPyIIzbwEfid1f8JZoixBLBkRRLjFF20VjiBLu/exec?action=admin','_blank')">
+      https://script.google.com/macros/s/.../exec?action=admin
+    </div>
+  </div>
+
+  <!-- CONTRATO DE PRUEBA -->
+  <div class="url-item" style="border-left-color:#38a169">
+    <div class="url-label">✍️ Ejemplo — Página de firma de contrato</div>
+    <div class="url-name">Contrato de prueba para ver cómo lo firma el cliente</div>
+    <div class="url-link" onclick="window.open('https://script.google.com/macros/s/AKfycbxDke4iQPJNiN-4ZgOsUI-NCVKTB3WPyIIzbwEfid1f8JZoixBLBkRRLjFF20VjiBLu/exec?action=contract&id=CON-q6uwXEEA6w9w','_blank')">
+      https://script.google.com/macros/s/.../exec?action=contract&id=CON-q6uwXEEA6w9w
+    </div>
+  </div>
+
+
+</div>
+
+<!-- TECNOLOGÍAS -->
+<div class="url-box" style="margin-top:16px">
+  <h2>🛠️ Tecnologías usadas (sin necesidad de servidor propio)</h2>
+  <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:4px">
+    <span class="tag tag-wpp" style="font-size:13px;padding:6px 14px">📱 WhatsApp + BuilderBot</span>
+    <span class="tag tag-bot" style="font-size:13px;padding:6px 14px">🤖 Inteligencia Artificial (IA)</span>
+    <span class="tag tag-script" style="font-size:13px;padding:6px 14px">⚙️ Google Apps Script</span>
+    <span class="tag tag-sheets" style="font-size:13px;padding:6px 14px">📊 Google Sheets (base de datos)</span>
+    <span class="tag tag-drive" style="font-size:13px;padding:6px 14px">📁 Google Drive (PDFs)</span>
+    <span class="tag tag-email" style="font-size:13px;padding:6px 14px">📧 Gmail (correos)</span>
+  </div>
+  <p style="margin-top:14px;font-size:13px;color:#718096">
+    💡 <strong>Todo corre en la nube de Google, gratis.</strong> No se necesita contratar servidores, hosting ni bases de datos externas.
+  </p>
+</div>
+
+</body>
+</html>
